@@ -4,6 +4,7 @@ var MochaWrapper = require('./lib/MochaWrapper');
 var fs = require('fs-extra');
 var path = require('path');
 var hooker = require('hooker');
+var Q = require('q');
 
 module.exports = function(grunt) {
 
@@ -74,15 +75,18 @@ module.exports = function(grunt) {
         files: files,
         options: options
       });
-      mochaWrapper.run(function(error, failureCount) {
-        if (error) {
-          grunt.log.error('Mocha exploded!');
-          grunt.log.error(error.stack);
-          complete(error);
-        } else {
-          complete(null, failureCount);
-        }
-      });
+      Q.all(mochaWrapper.promises)
+        .then(function() {
+          mochaWrapper.run(function(error, failureCount) {
+            if (error) {
+              grunt.log.error('Mocha exploded!');
+              grunt.log.error(error.stack);
+              complete(error);
+            } else {
+              complete(null, failureCount);
+            }
+          });
+        });      
     }, function(error, failureCount) {
       // restore the uncaught exception handlers
       restore();

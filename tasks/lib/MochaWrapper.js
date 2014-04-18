@@ -6,6 +6,8 @@ function MochaWrapper(params) {
   // If require option is specified then require that file.
   // This code has been adapted from the treatment of the require
   // option in the mocha source (bin/_mocha)
+  this.promises = [];
+  promises = this.promises;
   var cwd = process.cwd();
   var join = path.join;
   var resolve = path.resolve;
@@ -21,7 +23,7 @@ function MochaWrapper(params) {
         }
         require(mod);
       } else if (typeof mod === 'function') {
-        mod();
+        promises.push(mod());
       }
     });
   }
